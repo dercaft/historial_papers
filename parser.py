@@ -2,7 +2,7 @@ import enum
 from bs4 import BeautifulSoup
 import csv,re
 import bs4
-from translate import trans
+from translate import trans, trans_para
 import pickle
 def parse(sec,isquote=False)->list:
     article=[]
@@ -41,7 +41,7 @@ def parse(sec,isquote=False)->list:
                 else:
                     paragraph+=" "
                     hrbr=0
-            print("FOUND QUOTATION")
+            # print("FOUND QUOTATION")
             item=item.find("blockquote")
             paras=parse(item,True) # 返回的应该是列表
             article.extend(paras)
@@ -56,7 +56,7 @@ def decodeEEBO(htmlFilePath:str)->list:
     # 返回一个列表，其中每个元素是一个段落
     assert htmlFilePath.endswith("html")
     soup=BeautifulSoup(open(htmlFilePath,"r", encoding="utf-8"),"html.parser")
-    print(type(soup))
+    # print(type(soup))
     container=soup.find_all("div",id="readableContent")[0]
     secs=container.find_all("div1",id=re.compile(r"Sec0[0-9]+"))
     article=[]
@@ -70,46 +70,58 @@ if __name__=="__main__":
     with open("./papers.csv","r", encoding="utf-8") as f:
         read=csv.reader(f)
         lister=[i for i in read]
-    # for i in lister:
-    #     if i[1]=="EEBO":
-    #         path=i[3]
-    #         title=i[2]
-    #         print(title)
-    #         content=decodeEEBO(path)
-    #         pass
-    path=lister[1][3]
-    print(path)
-    title=lister[1][2]
-    print(title)
-    content=decodeEEBO(path)
-    for i,t in enumerate(content):
-        content[i]=re.sub("[ ]+"," ",t)
-    print("We get: ",len(content))
-    # print(content)
-    a=[print("*"*20,"\n",i) for i in content]
-    zh_content=[]
-    for para in content:
-        if len(para)>200:
-            sentences=para.split(".")
-            zh_para=""
-            for sent in sentences:
-                if len(sent)>1500:
-                    parts=sent.split(";")
-                    pret=""
-                    for i,p in enumerate(parts):
-                        ret=trans(p)
-                        if i+1<len(parts):
-                            ret+"；"
-                        pret+=ret
-                    pret+="。"
-                    zh_para+=pret
-                else:
-                    rsent=trans(sent)
-                    rsent+="。"
-                    zh_para+=rsent
-        else:
-            zh_para=trans(para)
-        zh_content.append(zh_para)
-        print(zh_para)
-    with open("ckpt/"+title+".pkl","wb") as f:
-        pickle.dump(zh_content,f)
+    for index,i in enumerate(lister):
+        if index<2: continue
+        if i[1]=="EEBO":
+            path=i[3]
+            title=i[2]
+            print(title)
+            content=decodeEEBO(path)
+            for i,t in enumerate(content):
+                content[i]=re.sub("[ ]+"," ",t)
+            print("We get: ",len(content))
+            # print(content)
+            a=[print("*"*20,"\n",i) for i in content]
+            zh_content=[]
+            for para in content:
+                zh_para=trans_para(para)
+                zh_content.append(zh_para)
+                print(zh_para)
+            with open("ckpt/"+title+".pkl","wb") as f:
+                pickle.dump(zh_content,f)
+    # path=lister[1][3]
+    # print(path)
+    # title=lister[1][2]
+    # print(title)
+    # content=decodeEEBO(path)
+    # for i,t in enumerate(content):
+    #     content[i]=re.sub("[ ]+"," ",t)
+    # print("We get: ",len(content))
+    # # print(content)
+    # a=[print("*"*20,"\n",i) for i in content]
+    # zh_content=[]
+    # for para in content:
+    #     if len(para)>200:
+    #         sentences=para.split(".")
+    #         zh_para=""
+    #         for sent in sentences:
+    #             if len(sent)>1500:
+    #                 parts=sent.split(";")
+    #                 pret=""
+    #                 for i,p in enumerate(parts):
+    #                     ret=trans(p)
+    #                     if i+1<len(parts):
+    #                         ret+"；"
+    #                     pret+=ret
+    #                 pret+="。"
+    #                 zh_para+=pret
+    #             else:
+    #                 rsent=trans(sent)
+    #                 rsent+="。"
+    #                 zh_para+=rsent
+    #     else:
+    #         zh_para=trans(para)
+    #     zh_content.append(zh_para)
+    #     print(zh_para)
+    # with open("ckpt/"+title+".pkl","wb") as f:
+    #     pickle.dump(zh_content,f)

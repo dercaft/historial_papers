@@ -15,3 +15,25 @@ def trans(sentence):
     data=data['translations']
     result="".join([ x['text'] for x in data])
     return result
+def trans_para(para):
+    if len(para)>200:
+        sentences=para.split(".")
+        zh_para=""
+        for sent in sentences:
+            if len(sent)>1500:
+                parts=sent.split(";")
+                pret=""
+                for i,p in enumerate(parts):
+                    ret=trans(p)
+                    if i+1<len(parts):
+                        ret+"；"
+                    pret+=ret
+                pret+="。"
+                zh_para+=pret
+            else:
+                rsent=trans(sent)
+                rsent+="。"
+                zh_para+=rsent
+    else:
+        zh_para=trans(para)
+    return zh_para
