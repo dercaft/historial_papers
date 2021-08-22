@@ -4,13 +4,17 @@ from urllib import parse
 def trans(sentence):
     auth="10419bf0-8084-be2d-7d50-9053a926bbd4"
     url="https://api.deepl.com/v1/translate"
+    proxies={
+    'http':'127.0.0.1:1080',
+    'https':'127.0.0.1:1080'
+    }
     header={"Content-Type":"application/x-www-form-urlencoded",}
     content={
         "auth_key":auth,
         "text":sentence,
         "target_lang":"ZH",
     }
-    response=requests.post(url,headers=header,data=content)
+    response=requests.post(url,headers=header,data=content,proxies=proxies)
     data=response.json()
     data=data['translations']
     result="".join([ x['text'] for x in data])

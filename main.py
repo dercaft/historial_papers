@@ -1,24 +1,32 @@
-import requests
-import urllib
-from urllib import parse
-auth="10419bf0-8084-be2d-7d50-9053a926bbd4"
-
-url="https://api.deepl.com/v1/translate"
-url="https://api.deepl.com/v1/usage"
-
-print(url)
-header={
-    "Content-Type":"application/x-www-form-urlencoded",
-}
-content={
-    "auth_key":auth,
-    # "text":"hello world",
-    # "target_lang":"ZH",
-}
-proxies={
-'http':'127.0.0.1:1080',
-'https':'127.0.0.1:1080'
-}
-response=requests.post(url,headers=header,data=content,proxies=proxies)
-print(response)
-print(response.text)
+import csv,re
+import pickle
+from translate import trans_para
+from generate import EEBO_Controller,EEBO_Parser
+if __name__=="__main__":
+    lister=[]
+    with open("./papers.csv","r", encoding="utf-8") as f:
+        read=csv.reader(f)
+        lister=[i for i in read]
+    for index,i in enumerate(lister):
+        if index<5: continue
+        title,path=i[2],i[3]
+        print(title)
+        if i[1]=="EEBO":
+            parser=EEBO_Parser()
+            controller=EEBO_Controller(path,parser)
+            controller.explore(controller.container)
+            content=parser.article
+            for i,t in enumerate(content):
+                content[i]=re.sub("[ ]+"," ",t)
+            print("We get: ",len(content))
+            # print(content)
+            a=[print("*"*20,"\n",i) for i in content]
+            zh_content=[]
+            for i,para in enumerate(content):
+                zh_para=trans_para(para)
+                zh_content.append(zh_para)
+                print(i,zh_para)
+            name=path.split("/")[-1].split(".")[0]
+            filename=name+".pkl"
+            with open("./ckpt/"+filename,"wb+") as f:
+                pickle.dump(zh_content,f)
