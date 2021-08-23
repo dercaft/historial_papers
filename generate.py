@@ -70,11 +70,6 @@ class Parser(object):
     def __init__(self,configs:dict) -> None:
         super().__init__()
         # Process control
-        # self._leafNodeType=configs["leafNodeType"]
-        # self._skipList=configs.get("skipList",[])
-        # self._continueList=configs.get("continueList",[])
-        # Tree properties
-        # self.nowNode=None
         self.parentNode=None
         self.lastNode=None
         # Paragraph propertis
@@ -82,16 +77,6 @@ class Parser(object):
         self.paragraph=""
         self.lastSentence=""
         self.article=[]
-    # @property
-    # def leafNode(self):
-    #     return self._leafNodeType
-    # '''Rules: '''
-    # @property
-    # def skipList(self):
-    #     return self._skipList
-    # @property
-    # def continueList(self):
-    #     return self._continueList
     @property
     def quote(self):
         return self._quote
@@ -160,6 +145,50 @@ class EEBO_Parser(Parser):
     def after_child(self,node):
         if node.name=="blockquote":
             self.endParagraph()
+class OLL_Parser(Parser):
+    def __init__(self) -> None:
+        super().__init__({})
+        self.nodeType=0
+    def ifDealLeaf(self, node):
+        n=node
+        while n.parent:
+            n=n.parent
+            cl=n.get("class","")
+            if type(cl)!=str: cl=cl[0]
+            if n.name=="span" and cl=="pb": 
+                return False
+            elif re.match("(p|h[0-9]+)",n.name): 
+                return True
+            elif re.match("(meta.*|epigraph)",cl):
+                return True
+        return False
+    def dealLeafNode(self, node):
+        sent=node.string if node.string else ""
+        self.paragraph+=sent
+        self.lastSentence=sent
+        pass
+    def before_child(self, node):
+        if type(node)==bs4.element.NavigableString:
+            return
+        cl=node.get("class","")
+        if type(cl)!=str: cl=cl[0]
+        idd=node.get("id","")
+        if type(idd)!=str: idd=idd[0]
+        
+        if re.match("lf[0-9]+_div_[0-9]+",idd):
+            self.nodeType=1
+        elif re.match(".*meta titlepage.*",cl):
+            self.nodeType=0
+    def after_child(self, node):
+        if type(node)==bs4.element.NavigableString:
+            return
+        cl=node.get("class","")
+        if type(cl)!=str: cl=cl[0]
+        if re.match("p|h[0-9]+",node.name) or \
+        self.nodeType==0 and re.match("(meta.*|bibl)",cl):
+            self.article.append(self.paragraph.strip("\n"))
+            self.lastSentence,self.paragraph="",""
+
 class Controller(object):
     def __init__(self, htmlpath,parser:Parser) -> None:
         super().__init__()
@@ -183,28 +212,38 @@ class EEBO_Controller(Controller):
         super().__init__(htmlpath,parser)
         soup=BeautifulSoup(open(self.htmlpath,"r", encoding="utf-8"),"html.parser")
         self.container=soup.find_all("div",id="readableContent")[0]
-        print(len(self.container))
-
+        # print(len(self.container))
+class OLL_Controller(Controller):
+    def __init__(self, htmlpath, parser: Parser) -> None:
+        super().__init__(htmlpath, parser)
+        soup=BeautifulSoup(open(self.htmlpath,"r", encoding="utf-8"),"html.parser")
+        # self.meta=soup.find_all("div",class_=re.compile("meta titlepage.*"))
+        self.container=soup.find_all("div",class_="document")[0]
+        
 if __name__=="__main__":
     lister=[]
     with open("./papers.csv","r", encoding="utf-8") as f:
         read=csv.reader(f)
         lister=[i for i in read]
     for index,i in enumerate(lister):
-        if index!=4: continue
+        if index!=9: continue
+        title,path=i[2],i[3]
+        print(title)
         if i[1]=="EEBO":
-            path=i[3]
-            title=i[2]
-            print(title)
             parser=EEBO_Parser()
             controller=EEBO_Controller(path,parser)
-            controller.explore(controller.container)
-            # content=decodeEEBO(path)
-            content=parser.article
-            for i,t in enumerate(content):
-                content[i]=re.sub("[ ]+"," ",t)
-            print("We get: ",len(content))
-            _=[print("*"*20,"\n",i) for i in content]
+        elif i[1]=="OLL":
+            parser=OLL_Parser()
+            controller=OLL_Controller(path,parser)
+        
+        controller.explore(controller.container)
+        # content=decodeEEBO(path)
+        content=parser.article
+        for i,t in enumerate(content):
+            content[i]=re.sub("[ ]+"," ",t)
+        print("We get: ",len(content))
+        _=[print("*"*20,"\n",i) for i in content]
+        pass
             # zh_content=[]
             # for i,para in enumerate(content):
             #     zh_para=trans_para(para)

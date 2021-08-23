@@ -15,7 +15,9 @@ def trans(sentence):
         "target_lang":"ZH",
     }
     response=requests.post(url,headers=header,data=content,proxies=proxies)
+    # response=requests.post(url,headers=header,data=content)
     data=response.json()
+    # print(data)
     data=data['translations']
     result="".join([ x['text'] for x in data])
     return result
@@ -41,3 +43,10 @@ def trans_para(para):
     else:
         zh_para=trans(para)
     return zh_para
+
+if __name__=="__main__":
+    test="hello,world"
+    test_zh=trans(test)
+    print(test)
+    print(test_zh)
+    

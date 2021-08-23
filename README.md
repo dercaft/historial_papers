@@ -85,13 +85,29 @@
 
 ### 规律与规则：
 
+1. 换行/段落：每个div/p都是一段
 
+   ```html
+   <div> </div>
+   <p> </p>
+   ```
+
+2. 文章信息都在meta titlepage中
+
+   ```html
+   <div class="meta titlepage">
+   ```
+
+3. 文本都在每一节的`<p>`中：
+
+   ```html
+   <div id="lf[0-9]+_div_[0-9]+">
+     <p>...</p>
+   ```
+
+4. 跳过
 
 ## BUG：
-
-### EEBO:
-
-- **”The second part of an argument shewing that a standing army is inconsistent“** 这篇，其出现了 `div[1-9]+ id="Sec[0-9]+"` 结构的嵌套，需要改变解码方式。
 
 
 
