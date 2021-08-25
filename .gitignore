@@ -1,6 +1,7 @@
 *.xlsx
 *.docx
 files/
+txt/
 .vscode/
 ckpt/
 result/
