@@ -179,6 +179,8 @@ class OLL_Parser(Parser):
             self.nodeType=1
         elif re.match(".*meta titlepage.*",cl):
             self.nodeType=0
+        if node.name=="div" and node.get("class","") == "cit":
+            self.paragraph+="QUOTE: "
     def after_child(self, node):
         if type(node)==bs4.element.NavigableString:
             return

@@ -1,4 +1,4 @@
-import csv,re
+import csv,re,os
 import pickle
 from docx import Document
 import pickle
@@ -26,9 +26,19 @@ if __name__=="__main__":
         content=parser.article
         for i,t in enumerate(content):
             content[i]=re.sub("[ ]+"," ",t)
-        # print(content)
-        # a=[print("*"*20,"\n",i) for i in content]
         print("*"*20)
+        print("We get: ",len(content))
+        print(len(path),path)
+        print(len(name),name)
+        ## Txt format
+        with open(os.path.join("./txt",name+".txt") ,"w+",encoding="utf-8") as f:
+            for line in content:
+                f.write(line)
+        ## pkl format
+        filename=name+".pkl"
+        with open("./ckpt/"+filename,"wb+") as f:
+            pickle.dump(zh_content,f)
+        ## Translation
         print(title)
         zh_content=[]
         for i,para in enumerate(content):
@@ -36,14 +46,8 @@ if __name__=="__main__":
             zh_content.append(zh_para)
             print(i,zh_para)
         name=path.split("/")[-1].split(".")[0]
-        filename=name+".pkl"
-        print("We get: ",len(content))
-        print(len(path),path)
-        print(len(name),name)
         print("*"*20)
-        with open("./ckpt/"+filename,"wb+") as f:
-            pickle.dump(zh_content,f)
-            
+        ## Save to word
         en=content
         zh=zh_content
         n=name

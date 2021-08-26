@@ -5,6 +5,10 @@ txt/
 .vscode/
 ckpt/
 result/
+figures/
+# statistic/
+nltk_data/
+# figures/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

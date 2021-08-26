@@ -25,3 +25,4 @@ if __name__=="__main__":
         with open(os.path.join("./txt",name+".txt") ,"w+",encoding="utf-8") as f:
             for line in content:
                 f.write(line)     
+                f.write("\n")     
