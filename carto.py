@@ -8,6 +8,8 @@ from generate import EEBO_Controller,EEBO_Parser
 from generate import OLL_Parser,OLL_Controller
 TILES=["html"]
 if __name__=="__main__":
+    filename_="CARTO.txt"
+    file_=open(os.path.join("./txt",filename_) ,"w+",encoding="utf-8")
     lister=[]
     with open("./papers.csv","r", encoding="utf-8") as f:
         read=csv.reader(f)
@@ -37,28 +39,50 @@ if __name__=="__main__":
         print("*"*20)
         print("We get: ",len(content))
         print(len(path),path)
-        print(len(name),name)
+        print(name)
         ## Txt format
-        with open(os.path.join("./txt",name+".txt") ,"w+",encoding="utf-8") as f:
-            for line in content:
-                f.write(line)
-                f.write("\n")
+        if not os.path.exists(os.path.join("./txt",name+".txt")):
+            with open(os.path.join("./txt",name+".txt") ,"w+",encoding="utf-8") as f:
+                for line in content:
+                    f.write(line)
+                    f.write("\n")
+                    file_.write(line)
+                    file_.write("\n")
+        ## load checkpoint
         ## Translation
+        zfilename="temp_"+name+".txt"
+        ckpt_length=0
+        if os.path.exists(zfilename):
+            with open(zfilename,"r",encoding="utf-8") as f:
+                ckpt_length=len(f.readlines())//2
+        # temp file finished
+        if ckpt_length>=len(content):continue
+
+        zfile=open(zfilename,"a+",encoding="utf-8")
         print("TITLE: ",title)
         zh_content=[]
         for i,para in enumerate(content):
-            zh_para=trans_para(para) if len(para) else ""
-            zh_content.append(zh_para)
-            print(i,zh_para)
-        name=path.split("/")[-1].split(".")[0]
+            if i<ckpt_length: continue
+            try:
+                zh_para=trans_para(para) if len(para) else ""
+                zh_content.append(zh_para)
+            except BaseException as e:
+                print(repr(e))
+                break
+            else:
+                zfile.write(para+"\n")
+                zfile.write(zh_para+"\n")
+                print(i,zh_para)
         print("*"*20)
         ## pkl format
         filename=name+".pkl"
         with open("./ckpt/"+filename,"wb+") as f:
             pickle.dump(zh_content,f)
         ## Save to word
-        en=content
         zh=zh_content
+        if ckpt_length: # Load from checkpoint
+            zh=pickle.load(open("./ckpt/"+filename,"rb"))
+        en=content
         n=name
         document=Document()
         para=document.add_heading(title)

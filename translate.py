@@ -1,8 +1,9 @@
 import requests
 import urllib
 from urllib import parse
+auth="8b5a4d6c-0196-5992-7903-9741cb5508bb"
+
 def trans(sentence):
-    auth="10419bf0-8084-be2d-7d50-9053a926bbd4"
     url="https://api.deepl.com/v1/translate"
     proxies={
     'http':'127.0.0.1:1080',
@@ -16,6 +17,9 @@ def trans(sentence):
     }
     response=requests.post(url,headers=header,data=content,proxies=proxies)
     # response=requests.post(url,headers=header,data=content)
+    # print(response.status_code)
+    # print(response.headers)
+    # print(response.content)
     data=response.json()
     # print(data)
     data=data['translations']
@@ -44,7 +48,24 @@ def trans_para(para):
         zh_para=trans(para)
     return zh_para
 
+def usage():
+    url="https://api.deepl.com/v1/usage"
+    proxies={
+    'http':'127.0.0.1:1080',
+    'https':'127.0.0.1:1080'
+    }
+    header={"Content-Type":"application/x-www-form-urlencoded",}
+    content={
+        "auth_key":auth,
+    }
+    response=requests.post(url,headers=header,data=content,proxies=proxies)
+    # response=requests.post(url,headers=header,data=content)
+    print(response.status_code)
+    print(response.headers)
+    print(response.content)
+    
 if __name__=="__main__":
+    usage()
     test="hello,world"
     test_zh=trans(test)
     print(test)
