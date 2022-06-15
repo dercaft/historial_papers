@@ -18,6 +18,7 @@ def trans(sentence):
     response=requests.post(url,headers=header,data=content,proxies=proxies)
     # response=requests.post(url,headers=header,data=content)
     # print(response.status_code)
+    assert response.status_code==200, print("NETWORK ERROR: ",response.status_code)
     # print(response.headers)
     # print(response.content)
     data=response.json()

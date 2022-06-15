@@ -221,7 +221,14 @@ class OLL_Controller(Controller):
         soup=BeautifulSoup(open(self.htmlpath,"r", encoding="utf-8"),"html.parser")
         # self.meta=soup.find_all("div",class_=re.compile("meta titlepage.*"))
         self.container=soup.find_all("div",class_="document")[0]
-        
+def remove_stop_words(contents,stop_words):
+    for k in stop_words:
+        assert type(k)==str
+    expr="("+"|".join(stop_words)+")"
+    for i,t in enumerate(content):
+        content[i]=re.sub("[ ]+"," ",t)
+        content[i]=re.sub(expr,"",t)
+
 if __name__=="__main__":
     lister=[]
     with open("./papers.csv","r", encoding="utf-8") as f:

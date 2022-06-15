@@ -61,6 +61,10 @@ if __name__=="__main__":
         zfile=open(zfilename,"a+",encoding="utf-8")
         print("TITLE: ",title)
         zh_content=[]
+        filename=name+".pkl"
+        if ckpt_length: # Load from checkpoint
+            zh_content=pickle.load(open("./ckpt/"+filename,"rb"))
+
         for i,para in enumerate(content):
             if i<ckpt_length: continue
             try:
@@ -75,7 +79,6 @@ if __name__=="__main__":
                 print(i,zh_para)
         print("*"*20)
         ## pkl format
-        filename=name+".pkl"
         with open("./ckpt/"+filename,"wb+") as f:
             pickle.dump(zh_content,f)
         ## Save to word

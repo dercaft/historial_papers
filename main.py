@@ -7,15 +7,17 @@ from translate import trans_para
 from generate import EEBO_Controller,EEBO_Parser
 from generate import OLL_Parser,OLL_Controller
 TILES=["html"]
+FILE_PATH="./papers2.csv"
+
 if __name__=="__main__":
     lister=[]
-    with open("./papers.csv","r", encoding="utf-8") as f:
+    with open(FILE_PATH,"r", encoding="utf-8") as f:
         read=csv.reader(f)
         lister=[i for i in read]
     for index,i in enumerate(lister):
-        if index <10 : continue
+        # if index <10 : continue
         title,path=i[2],i[3]
-        if not "卡托的信" in title: continue
+        # if not "卡托的信" in title: continue
         if i[1]=="EEBO":
             parser=EEBO_Parser()
             controller=EEBO_Controller(path,parser)
@@ -27,6 +29,7 @@ if __name__=="__main__":
         content=parser.article
         for i,t in enumerate(content):
             content[i]=re.sub("[ ]+"," ",t)
+            content[i]=re.sub("(〈◊〉|〈◊◊〉)","",content[i])
             
         name=path.split("/")[-1]
         for t in TILES:

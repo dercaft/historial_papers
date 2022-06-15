@@ -1,10 +1,11 @@
 import csv,re,os
 from generate import EEBO_Controller,EEBO_Parser
 from generate import OLL_Parser,OLL_Controller
-
+FILE_PATH="./papers2.csv"
 if __name__=="__main__":
     lister=[]
-    with open("./papers.csv","r", encoding="utf-8") as f:
+    assert os.path.isfile(FILE_PATH)
+    with open(FILE_PATH,"r", encoding="utf-8") as f:
         read=csv.reader(f)
         lister=[i for i in read]
     for index,i in enumerate(lister):
@@ -21,6 +22,7 @@ if __name__=="__main__":
         content=parser.article
         for i,t in enumerate(content):
             content[i]=re.sub("[ ]+"," ",t)
+            content[i]=re.sub("(〈◊〉|〈◊◊〉)","",content[i])
         name=path.split("/")[-1].split(".")[0]
         with open(os.path.join("./txt",name+".txt") ,"w+",encoding="utf-8") as f:
             for line in content:
